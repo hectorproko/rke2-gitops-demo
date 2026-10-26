@@ -1,0 +1,53 @@
+# DataVolume: tells CDI to fetch the CirrOS image and write it into a PVC
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: cirros-dv
+  namespace: default
+spec:
+  source:
+    http:
+      url: "https://download.cirros-cloud.net/0.6.2/cirros-0.6.2-x86_64-disk.img"
+  storage:
+    resources:
+      requests:
+        storage: 2Gi
+    accessModes:
+      - ReadWriteOnce
+---
+# VirtualMachine: the VM definition — always-on (runStrategy: Always)
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: cirros-vm
+  namespace: default
+  labels:
+    app: cirros-vm
+spec:
+  runStrategy: Always    # Start VM automatically; keep it running
+  template:
+    metadata:
+      labels:
+        app: cirros-vm
+    spec:
+      domain:
+        cpu:
+          cores: 1
+        resources:
+          requests:
+            memory: 128Mi
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+          interfaces:
+            - name: default
+              masquerade: {}   # NAT via pod network — simplest networking mode
+      networks:
+        - name: default
+          pod: {}
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: cirros-dv

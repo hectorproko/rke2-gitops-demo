@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kubevirt-operator
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"   # Install operator first
+spec:
+  project: default
+  source:
+    # Point directly at the upstream operator release — version-pinned via URL
+    repoURL: https://github.com/kubevirt/kubevirt
+    targetRevision: v1.3.1              # Pin a specific release tag
+    path: staging/src/kubevirt.io/kubevirt/manifests/release
+    # Alternative: use a raw URL source for a single manifest file
+    # If your Argo CD version supports it, you can also do:
+    # repoURL: https://github.com/kubevirt/kubevirt/releases/download/v1.3.1
+    # chart: kubevirt-operator  (if using Helm)
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kubevirt
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true   # KubeVirt CRDs are large; SSA avoids annotation size limits

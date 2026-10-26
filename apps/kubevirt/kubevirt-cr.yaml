@@ -1,0 +1,12 @@
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+spec:
+  configuration:
+    developerConfiguration:
+      useEmulation: true   # REQUIRED on EC2 — no KVM on non-metal instances
+  workloadUpdateStrategy:
+    workloadUpdateMethods:
+    - LiveMigrate

@@ -1,0 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - kubevirt-cr.yaml
+  # Note: the operator is applied via the Argo Application's spec.source.path
+  # pointing to the upstream URL — see argo-apps/kubevirt-app.yaml
